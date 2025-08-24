@@ -127,6 +127,120 @@
                 background-position: 0% 50%;
             }
         }
+        
+        .faq-question {
+            cursor: pointer;
+        }
+        .faq-arrow {
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .faq-item.open .faq-arrow {
+            transform: rotate(180deg);
+        }
+        .faq-answer {
+            display: grid;
+            grid-template-rows: 0fr; /* Mặc định ẩn câu trả lời */
+            overflow: hidden;
+            transition: grid-template-rows 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .faq-item.open .faq-answer {
+            grid-template-rows: 1fr; /* Hiện câu trả lời với chiều cao tự động */
+        }
+        .faq-answer > div {
+            min-height: 0;
+        }
+
+        .department-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .department-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 30px 40px -20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-bg-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.05;
+            background-size: cover;
+            transition: opacity 0.3s ease, transform 0.5s ease;
+        }
+
+        .department-card:hover .card-bg-pattern {
+            opacity: 0.1;
+            transform: scale(1.1);
+        }
+
+        .card-icon {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border-radius: 9999px;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: inline-flex;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-icon svg {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        .card-slogan {
+            font-size: 1.125rem;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-tasks {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            width: 100%;
+        }
+
+        .card-tasks li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .card-tasks li::before {
+            content: '✓';
+            margin-right: 0.75rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            flex-shrink: 0;
+        }
+        /* === CSS CHO PHẦN PHONG TRÀO HÀNH ĐỘNG MỚI === */
+        .movement-card {
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-color: transparent;
+        }
+        .movement-card.active {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            background-color: white;
+        }
+        .movement-card[data-color="blue"].active { border-color: #3b82f6; }
+        .movement-card[data-color="rose"].active { border-color: #f43f5e; }
+        .movement-card[data-color="teal"].active { border-color: #14b8a6; }
+
+        .movement-content { animation: fadeIn 0.6s ease-in-out; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(15px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
 
     </style>
 </head>
@@ -313,7 +427,43 @@
                     }
                 }, 1000);
             }
-            
+            const initMovementCards = () => {
+                const container = document.getElementById('movement-cards-container');
+                if (!container) return;
+
+                const cards = container.querySelectorAll('.movement-card');
+                const contents = document.querySelectorAll('.movement-content');
+                const mainSection = document.getElementById('phong-trao-section');
+                const originalBg = 'bg-gradient-to-br from-sky-50 to-blue-100'; // Nền mặc định
+
+                // Lấy danh sách class nền cũ để xóa
+                const bgClasses = Array.from(cards).map(c => c.dataset.bg);
+
+                cards.forEach(card => {
+                    card.addEventListener('click', () => {
+                        // Xử lý active state cho card
+                        cards.forEach(c => c.classList.remove('active'));
+                        card.classList.add('active');
+
+                        // Ẩn/hiện nội dung tương ứng
+                        const targetId = card.dataset.content;
+                        contents.forEach(content => {
+                            content.classList.toggle('hidden', content.id !== targetId);
+                        });
+
+                        // Cập nhật nền cho section
+                        if (mainSection) {
+                            const newBg = card.dataset.bg || originalBg;
+                            // Xóa tất cả các class nền có thể có
+                            mainSection.classList.remove(...bgClasses);
+                            // Thêm class nền mới
+                            mainSection.classList.add(...newBg.split(' '));
+                        }
+                    });
+                });
+            };
+            initMovementCards(); // Gọi hàm
+           
             // 7. FAQ ACCORDION
             const initFAQ = () => {
                 const faqItems = document.querySelectorAll('.faq-item');
